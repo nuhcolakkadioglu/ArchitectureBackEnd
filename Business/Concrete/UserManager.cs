@@ -1,6 +1,8 @@
 ﻿using Business.Abstract;
+using Core.Utilities.Hashing;
 using DataAccess.Abstract;
 using Entities.Concrete;
+using Entities.Dtos.AuthDto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,9 +20,32 @@ namespace Business.Concrete
             _userDal = userDal;
         }
 
-        public void Add(User model)
+        public void Add(RegisterAuthDto model)
         {
-            _userDal.Add(model);
+           
+  
+            byte[] passwordHash, passwordSalt;
+            HashingHelper.CreatePassword(model.Password,out passwordHash,out passwordSalt);
+            User user = new()
+            {
+                Email = model.Email,
+                Name = model.Name,
+                ImageUrl = model.ImageUrl,
+                PasswordHash = passwordHash,
+                PasswordSalt = passwordSalt
+
+            };
+            _userDal.Add(user);
+        }
+
+        public List<User> GetAll()
+        {
+            return _userDal.GetAll();
+        }
+
+        public User GetByEmail(string email)
+        {
+            return _userDal.Get(m => m.Email == email);
         }
     }
 }

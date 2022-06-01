@@ -1,4 +1,5 @@
 ﻿using Entities.Concrete;
+using Entities.Dtos.AuthDto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,8 @@ namespace Business.Abstract
 {
     public interface IUserService
     {
-        void Add(User model);
-
+        void Add(RegisterAuthDto model);
+        List<User> GetAll();
+        User GetByEmail(string email);
     }
 }
