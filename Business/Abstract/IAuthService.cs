@@ -1,4 +1,6 @@
-﻿using Entities.Dtos.AuthDto;
+﻿using Core.Utilities.Result.Abstract;
+using Core.Utilities.Result.Concrete;
+using Entities.Dtos.AuthDto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +11,7 @@ namespace Business.Abstract
 {
     public interface IAuthService
     {
-        void Register(RegisterAuthDto model);
+        IResult Register(RegisterAuthDto model,int imageSize);
         string Login(LoginAuthDto model);
     }
 }

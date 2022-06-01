@@ -18,14 +18,17 @@ namespace WebApi.Controllers
         [HttpPost("Register")]
         public IActionResult Register([FromBody] RegisterAuthDto user)
         {
-            _authService.Register(user);
-            return Ok(new { message = "User added" });
+            var result = _authService.Register(user,2);
+            if (result.Success)
+                return Ok(new { message = result });
+
+            return BadRequest(result);
         }
 
         [HttpPost("Login")]
         public IActionResult Login([FromBody] LoginAuthDto user)
         {
-           var result = _authService.Login(user);
+            var result = _authService.Login(user);
             return Ok(new { message = result });
         }
     }
