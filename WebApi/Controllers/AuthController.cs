@@ -16,7 +16,7 @@ namespace WebApi.Controllers
             _authService = authService;
         }
         [HttpPost("Register")]
-        public IActionResult Register([FromBody] RegisterAuthDto user)
+        public IActionResult Register([FromForm] RegisterAuthDto user)
         {
             var result = _authService.Register(user,2);
             if (result.Success)

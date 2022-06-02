@@ -30,7 +30,7 @@ namespace Business.Concrete
             {
                 Email = model.Email,
                 Name = model.Name,
-                ImageUrl = model.ImageUrl,
+               // ImageUrl = model.ImageUrl,
                 PasswordHash = passwordHash,
                 PasswordSalt = passwordSalt
 
