@@ -1,6 +1,8 @@
 ﻿using Business.Abstract;
 using Business.ValidationRules.FluentValidation;
+using Core.Aspects.Validation;
 using Core.CrossCuttingConcerns.Validation;
+using Core.Utilities.Business;
 using Core.Utilities.Hashing;
 using Core.Utilities.Result.Abstract;
 using Core.Utilities.Result.Concrete;
@@ -38,45 +40,42 @@ namespace Business.Concrete
 
         }
 
+        [ValidationAspect(typeof(UserValidator))]
         public IResult Register(RegisterAuthDto model, int imageSize)
         {
-            imageSize = 2;
-            
-            UserValidator userValidator = new UserValidator();
-            ValidationTool.Validate(userValidator, model);
+            imageSize = 1;
 
-            if (!CheckIfEmailExist(model.Email))
-            {
-                _logger.LogInformation($"{model.Email} daha önceden kayıt edilmiş");
-                return new ErrorResult($"{model.Email} daha önceden kayıt edilmiş");
-            }
-            else
-            {
-                if (CheckIfImageSize(imageSize))
-                {
-                    _userService.Add(model);
-                    _logger.LogInformation("Kayıt işlemi başarılı");
-                    return new SuccessResult("Kayıt işlemi başarılı");
-                }
-                return new ErrorResult($"Dosya boyutu 1mb den büyük olamaz");
-            }
+            //UserValidator userValidator = new UserValidator();
+            //ValidationTool.Validate(userValidator, model);
+
+            IResult result = BusinessRules.Run(CheckIfEmailExist(model.Email), CheckIfImageSize(imageSize));
+
+            if (!result.Success)
+                return result;
+
+
+            _userService.Add(model);
+            _logger.LogInformation(result.Message);
+            return new SuccessResult(result.Message);
+
         }
 
-        private bool CheckIfEmailExist(string email)
+        private IResult CheckIfEmailExist(string email)
         {
             var list = _userService.GetByEmail(email);
             if (list != null)
-                return false;
+                return new ErrorResult("Bu mail adresi daha önce kullanılmış");
 
-            return true;
+            return new SuccessResult();
         }
-        
-        private bool CheckIfImageSize(int imageSize)
+
+        private IResult CheckIfImageSize(int imageSize)
         {
             if (imageSize > 1)
-                return false;
-                    
-            return true;
+                return new ErrorResult("Dosya boyutu 1mb den büyük olamaz");
+
+
+            return new SuccessResult();
         }
     }
 }
