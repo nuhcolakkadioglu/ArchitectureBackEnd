@@ -8,6 +8,7 @@ using Core.Utilities.Result.Abstract;
 using Core.Utilities.Result.Concrete;
 using Entities.Dtos.AuthDto;
 using FluentValidation.Results;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -41,22 +42,16 @@ namespace Business.Concrete
         }
 
         [ValidationAspect(typeof(UserValidator))]
-        public IResult Register(RegisterAuthDto model, int imageSize)
+        public IResult Register(RegisterAuthDto model)
         {
-            imageSize = 1;
+            IResult result = BusinessRules.Run(CheckIfEmailExist(model.Email), ChechIfImageExtensionAllow(model.Image.FileName), CheckIfImageSize(model.Image.Length));
 
-            //UserValidator userValidator = new UserValidator();
-            //ValidationTool.Validate(userValidator, model);
-
-            IResult result = BusinessRules.Run(CheckIfEmailExist(model.Email), CheckIfImageSize(imageSize));
-
-            if (!result.Success)
+            if (result!=null)
                 return result;
 
-
             _userService.Add(model);
-            _logger.LogInformation(result.Message);
-            return new SuccessResult(result.Message);
+            _logger.LogInformation("register success");
+            return new SuccessResult();
 
         }
 
@@ -69,13 +64,29 @@ namespace Business.Concrete
             return new SuccessResult();
         }
 
-        private IResult CheckIfImageSize(int imageSize)
+        private IResult CheckIfImageSize(long imageSize)
         {
-            if (imageSize > 1)
+            decimal imgmbSize =Convert.ToDecimal( imageSize * 0.000001);
+            
+            if (imgmbSize > 1)
                 return new ErrorResult("Dosya boyutu 1mb den büyük olamaz");
 
 
             return new SuccessResult();
         }
+        private IResult ChechIfImageExtensionAllow(string file)
+        {
+
+            var ext = file.Substring(file.LastIndexOf('.'));
+            var extension = ext.ToLower();
+            List<string> AllowFileExtensions = new List<string> { ".jpg", ".jpeg", ".gif", ".png" };
+
+            if (!AllowFileExtensions.Contains(extension))
+            {
+                return new ErrorResult("Resim formatı desteklenmiyor.");
+            }
+            return new SuccessResult("Resim formatı destekleniyor.");
+        }
+
     }
 }

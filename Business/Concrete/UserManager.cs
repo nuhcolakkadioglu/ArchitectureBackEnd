@@ -14,30 +14,40 @@ namespace Business.Concrete
     public class UserManager : IUserService
     {
         private readonly IUserDal _userDal;
-
-        public UserManager(IUserDal userDal)
+        private readonly IFileService _fileService;
+        public UserManager(IUserDal userDal, IFileService fileService)
         {
             _userDal = userDal;
+            _fileService = fileService;
         }
 
-        public void Add(RegisterAuthDto model)
+        public async void Add(RegisterAuthDto model)
         {
-           
-  
+
+            string fileName = _fileService.FileSave(model.Image, "./Content/img/");
+
+           // byte[] fileByte = _fileService.FileConvertByteArrayToDatabase(model.Image);
+
+
+            User user = Create(model, fileName);
+            _userDal.Add(user);
+        }
+
+        private User Create(RegisterAuthDto model, string fileName)
+        {
             byte[] passwordHash, passwordSalt;
-            HashingHelper.CreatePassword(model.Password,out passwordHash,out passwordSalt);
+            HashingHelper.CreatePassword(model.Password, out passwordHash, out passwordSalt);
             User user = new()
             {
                 Email = model.Email,
                 Name = model.Name,
-               // ImageUrl = model.ImageUrl,
+                ImageUrl = fileName,
                 PasswordHash = passwordHash,
                 PasswordSalt = passwordSalt
 
             };
-            _userDal.Add(user);
+            return user;
         }
-
         public List<User> GetAll()
         {
             return _userDal.GetAll();

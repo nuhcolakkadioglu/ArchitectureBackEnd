@@ -20,9 +20,8 @@ namespace Core.Utilities.Business
                     return result;
                 }
 
-                successResult.Message = result.Message;
             }
-            return successResult;
+            return null;
         }
        
     }
